@@ -153,7 +153,10 @@ class HBNBCommand(cmd.Cmd):
         instance = objects[key]
         setattr(instance, attribute_name, attribute_value)
         instance.save()
-     
+    
+    def emptyline(self,arg):
+        """ Do nothing when an empty line is entered"""
+        pass
 
 if __name__ == '__main__':
     HBNBCommand().cmdloop()
