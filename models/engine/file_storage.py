@@ -48,3 +48,4 @@ class FileStorage:
             pass
         except json.JSONDecodeError:
             pass
+

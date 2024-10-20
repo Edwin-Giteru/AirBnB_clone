@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 """ writing a class user that inherits from BaseModel"""
 from models.base_model import BaseModel
+import models
 
 
 class User(BaseModel):
@@ -19,3 +20,8 @@ class User(BaseModel):
         return "User(email={},password={}, first_name={},last_name={})".format(
                 self.email, self.password, self.first_name, self.last_name)
 
+    @classmethod
+    def all(cls):
+        """Retrieve all instances of this class from storage"""
+        all_objects = storage.all()
+        return [obj for obj in all_objects.values() if isinstance(obj, cls)]

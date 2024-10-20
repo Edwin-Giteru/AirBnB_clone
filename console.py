@@ -2,7 +2,7 @@
 """
 This module defines the command interpreter for the AirBnB clone project.
 """
-
+import re
 import cmd
 from models.base_model import BaseModel
 from models import storage
@@ -98,6 +98,7 @@ class HBNBCommand(cmd.Cmd):
     def do_all(self,arg):
         """Prints all string representations"""
         all_instances = storage.all()
+
         if not arg:
             for instance in all_instances.values():
                 print(instance)
@@ -113,8 +114,9 @@ class HBNBCommand(cmd.Cmd):
                         }
                 for instance in legit_instances.values():
                     print(instance)
-
+                
     def do_update(self, arg):
+
         """Updates an instance based on the class name"""
         if not arg:
             print("** class name missing **")
@@ -157,6 +159,73 @@ class HBNBCommand(cmd.Cmd):
     def emptyline(self,arg):
         """ Do nothing when an empty line is entered"""
         pass
+    
+    def do_count(self,arg):
+        """ Counts all instances of a class"""
+        all_instances = storage.all()
+        if not arg:
+            print("** class name missing **")
+            return
+        class_name = arg.strip()
+        if class_name not in self.classes:
+            print("** class doesn't exists **")
+            return
+        count = sum(1 for key in all_instances if key.startswith(class_name + '.'))
+        print(count)
+    
+    def default(self, arg):
+        """ Handles commands like <class.name>.all"""
+        match = re.fullmatch(r"(\w+)\.(\w+)\((.*)\)", arg)
+        if match:
+            class_name, method, args = match.groups()
+            if class_name in self.classes:
+                if method == "all":
+                    self.do_all(class_name)
+                elif method == "count":
+                    self.do_count(class_name)
+                elif method == "show":
+                    self.do_show(f"{class_name} {args.strip()}")
+                elif method == "destroy":
+                    self.do_destroy(f"{class_name} {args.strip()}")
+                elif method == "update":
+                    update_match = re.fullmatch(r'"([^"]+)", (\{.*\})', args.strip())
+                    if update_match:
+                        instance_id, attributes_dict = update_match.groups()
+                        self.update_with_dict(class_name, instance_id, eval(attributes_dict))
+                    else:
+                        parts = args.split(", ")
+                        if len(parts) == 3:
+                            instance_id, attr_name, attr_value = parts
+                            attr_value = attr_value.strip('"')
+                            self.do_update(f"{class_name} {instance_id} {attr_name} {attr_value}")
+                        else:
+                            print("** invalid syntax **")
+                else:
+                    print("** invalid method **")
+            else:
+                print("** class doesn't exist **")
+        else:
+            print("** unknown syntax: {}".format(arg)) 
+
+    def update_with_dict(self, class_name, instance_id, attributes_dict):
+        """Update an instance using a dictionary representation."""
+        key = "{}.{}".format(class_name,instance_id)
+        all_instances = storage.all()
+
+        if key not in all_instances:
+            print("** no instance found **")
+            return
+
+        instance = all_instances[key]
+        for attr_name, attr_value in attributes_dict.items():
+            if hasattr(instance, attr_name):
+                attr_type = type(getattr(instance, attr_name))
+                attr_value = attr_type(attr_value)
+            setattr(instance, attr_name, attr_value)
+
+        instance.save()
+
+
 
 if __name__ == '__main__':
     HBNBCommand().cmdloop()
