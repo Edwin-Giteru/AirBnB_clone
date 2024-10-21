@@ -184,9 +184,9 @@ class HBNBCommand(cmd.Cmd):
                 elif method == "count":
                     self.do_count(class_name)
                 elif method == "show":
-                    self.do_show(f"{class_name} {args.strip()}")
+                    self.do_show("{} {}").format(class_name, args.strip())
                 elif method == "destroy":
-                    self.do_destroy(f"{class_name} {args.strip()}")
+                    self.do_destroy("{} {}").format(class_name, args.strip())
                 elif method == "update":
                     update_match = re.fullmatch(r'"([^"]+)", (\{.*\})', args.strip())
                     if update_match:
@@ -197,7 +197,7 @@ class HBNBCommand(cmd.Cmd):
                         if len(parts) == 3:
                             instance_id, attr_name, attr_value = parts
                             attr_value = attr_value.strip('"')
-                            self.do_update(f"{class_name} {instance_id} {attr_name} {attr_value}")
+                            self.do_update("{} {} {} {}").format(class_name, instance_id, attr_value)
                         else:
                             print("** invalid syntax **")
                 else:
